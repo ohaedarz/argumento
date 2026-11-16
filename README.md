@@ -47,8 +47,8 @@ command line:
 
 ### ENV variable parsing
 
-Supports parsing of ${ENV_VARIABLES} in strings.    
-Syntax: ${ENV_VARIABLE:type|default_value} or just ${ENV_VARIABLE} / ${ENV_VARIABLE:type} / ${ENV_VARIABLE|default_value}.  
+Supports parsing of `${ENV_VARIABLES}` in strings.    
+Syntax: `${ENV_VARIABLE:type|default_value}` or just `${ENV_VARIABLE} / ${ENV_VARIABLE:type}` / `${ENV_VARIABLE|default_value}`.  
 If possible ENV_VARIABLE will be resolved as python-valid code strings (with ast.literal_eval()) and typecast to one of:  
    - int (e.g. "5" -> 5)  
    - float ("5.0" -> 5.0)  
