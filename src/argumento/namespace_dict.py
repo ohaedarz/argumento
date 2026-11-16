@@ -18,31 +18,32 @@ class NamespaceDict(dict):
             curr_attr = item[:idx_dot]
             nested_attr = item[idx_dot + 1:]
             nested_map = self.get(curr_attr)
+            if not isinstance(nested_map, dict):
+                return None
             return nested_map.get(nested_attr)
         else:
             return self.get(item)
 
     def __setitem__(self, key, value):
-        if isinstance(value, dict):
+        if isinstance(value, dict) and not isinstance(value, NamespaceDict):
             value = NamespaceDict(value)
         idx_dot = key.find('.')
         if idx_dot >= 0:
             attr = key[:idx_dot]
-            nested_key = key[idx_dot+1:]
+            nested_key = key[idx_dot + 1:]
             nested_map = self.get(attr)
-            if nested_map is None:
-                nested_map = NamespaceDict()
-            nested_map.__setitem__(nested_key, value)
+            if not isinstance(nested_map, NamespaceDict):
+                nested_map = NamespaceDict() if nested_map is None else NamespaceDict(nested_map)
+            nested_map[nested_key] = value
             super(NamespaceDict, self).__setitem__(attr, nested_map)
-            self.__dict__.update({attr: nested_map})
+            self.__dict__[attr] = nested_map
         else:
             super(NamespaceDict, self).__setitem__(key, value)
-            self.__dict__.update({key: value})
+            self.__dict__[key] = value
 
     def __delattr__(self, item):
         self.__delitem__(item)
 
     def __delitem__(self, key):
         super(NamespaceDict, self).__delitem__(key)
-        del self.__dict__[key]
-
+        self.__dict__.pop(key, None)

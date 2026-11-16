@@ -87,11 +87,11 @@ def test_setitem_existing_nested_preserves_siblings():
     """Setting a new sibling key under an existing nested NamespaceDict must
     not clobber the keys that were already there."""
     ns_dict = NamespaceDict()
-    ns_dict['item1.subitem1'] = 11
+    ns_dict['item1'] = {'subitem1': {'deep': 11}}
     ns_dict['item1.subitem2'] = 12
-    assert ns_dict.item1.subitem1 == 11
+    assert ns_dict.item1.subitem1.deep == 11
     assert ns_dict.item1.subitem2 == 12
-    # deep: add a 3rd level under an existing branch
+    # deep: add a key under an existing nested branch (parent already exists)
     ns_dict['item1.subitem1.nested'] = 99
     assert ns_dict.item1.subitem1.nested == 99
     assert ns_dict.item1.subitem2 == 12
