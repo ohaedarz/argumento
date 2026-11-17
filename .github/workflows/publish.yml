@@ -1,0 +1,43 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # Runs the same checks as CI on the tagged commit, so a broken build
+  # can never reach PyPI. Tag pushes do not run the branch CI, so the
+  # verification lives here, in the publish job, before the upload.
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for PyPI trusted publishing (OIDC)
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install package + test deps
+        run: uv pip install -e . pytest
+
+      - name: Run tests
+        run: uv run pytest tests -q
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish
+        env:
+          # Option A: PyPI trusted publishing (OIDC) - no token needed.
+          #   Configure in PyPI: Project -> Integrations -> "Publishing via Trusted Publishers"
+          #   Add this repo + workflow ("publish") + tag "v*".
+          # Option B: API token - set PYPI_API_TOKEN as a repo secret and uncomment:
+          # UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          UV_PUBLISH_TOKEN: ""
