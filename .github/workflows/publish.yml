@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*"
-
+  workflow_dispatch:
 jobs:
   # Runs the same checks as CI on the tagged commit, so a broken build
   # can never reach PyPI. Tag pushes do not run the branch CI, so the
