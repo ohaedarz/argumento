@@ -1,3 +1,10 @@
+## [1.3.0] - 2026-11-16
+
+### Changed
+
+- Bumped minimum supported Python to 3.9 (dropped EOL 3.7/3.8)
+- Removed `argumento.__version__`; read version via `importlib.metadata.version("argumento")`
+
 ## [1.2.1] - 2024-10-09
 
 ### Fixed

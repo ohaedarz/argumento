@@ -47,8 +47,8 @@ command line:
 
 ### ENV variable parsing
 
-Supports parsing of ${ENV_VARIABLES} in strings.    
-Syntax: ${ENV_VARIABLE:type|default_value} or just ${ENV_VARIABLE} / ${ENV_VARIABLE:type} / ${ENV_VARIABLE|default_value}.  
+Supports parsing of `${ENV_VARIABLES}` in strings.    
+Syntax: `${ENV_VARIABLE:type|default_value}` or just `${ENV_VARIABLE} / ${ENV_VARIABLE:type}` / `${ENV_VARIABLE|default_value}`.  
 If possible ENV_VARIABLE will be resolved as python-valid code strings (with ast.literal_eval()) and typecast to one of:  
    - int (e.g. "5" -> 5)  
    - float ("5.0" -> 5.0)  
@@ -130,3 +130,50 @@ Supported data types are:
 - float
 - list\[int]
 - list\[float]
+
+## Accessing config values
+
+`parse()` returns a `NamespaceDict`, so every value is reachable both as a dict
+key and as an attribute, at any depth:
+
+```python
+args = argumento.create_parser('config.yaml').parse()
+
+args.login                  # top-level key
+args.database.connection_max   # nested key
+args['database']['connection_max']
+args['database.connection_max']  # dotted path
+```
+
+### Every mapping is a `NamespaceDict`
+
+Any value that is a mapping (a nested section, or a dict inside a list) is
+always exposed as a `NamespaceDict`, no matter how it was set. A plain `dict`
+you assign is transparently wrapped, so `args.ports[0].host` works just as well
+as `args.ports[0]['host']`.
+
+### Auto-creation and precedence of access styles
+
+- `args.a.b = value` — auto-creates the intermediate `a` section.
+- `args['a.b'] = value` — also auto-creates `a`.
+- `args['a']['b'] = value` — requires `a` to already exist; the dotted or
+  attribute form is preferred for new nested keys.
+
+Reading a missing **key** (`args['missing']`) returns `None` and does not
+create anything, so a missing value stays distinguishable from an empty one.
+Reading a missing **attribute** (`args.missing`) auto-creates an empty
+`NamespaceDict`; this is what makes `args.a.b = value` work on a fresh object.
+
+### Precedence
+
+Configuration is resolved in two tiers: the config file (with `${ENV_VAR}`
+interpolation resolved at parse time) is the base layer, and command-line
+flags override it. So:
+
+```
+CLI  >  config file (incl. env-var interpolation)
+```
+
+A key that is a literal in the file can only be overridden via the command
+line. A key defined in the file as `${ENV_VAR}` is filled from the environment,
+but a command-line flag still wins over it.

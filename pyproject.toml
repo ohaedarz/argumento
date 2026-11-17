@@ -1,42 +1,39 @@
 [build-system]
-requires = [
-    "setuptools>=61.0",
-    "toml>=0.10",
-    "PyYAML>=6.0"
-]
-
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-
 [project]
+name = "argumento"
+version = "1.3.0"
+description = "Read app configuration from YAML, TOML, or JSON files, the command line, and environment variables, with CLI overrides."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "OK111", email = "oleg.khadartsev@gmail.com" },
+]
 dependencies = [
     "toml>=0.10",
-    "PyYAML>=6.0"
+    "PyYAML>=6.0",
 ]
-
-name = "argumento"
-authors = [
-  { name="OK111", email="oleg.khadartsev@gmail.com" },
-]
-description = "Package for combining config and command-line args"
-readme = "README.md"
-requires-python = ">=3.7"
 classifiers = [
-    "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
+urls = { Homepage = "https://github.com/ohaedarz/argumento" }
 
-
-dynamic = ["version"]
-
-[tool.setuptools.dynamic]
-version = {attr = "argumento.__version__"}
-
-[project.urls]
-"Homepage" = "https://github.com/OlegKhadartsev/config-args"
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = [
-  "src"
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
 ]

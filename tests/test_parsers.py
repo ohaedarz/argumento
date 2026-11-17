@@ -191,3 +191,33 @@ def test_env_casting(ext):
     assert args.casting.unexpected_type_cast_default == 123  # Not 125! Had to compromise.
 
 
+@pytest.mark.parametrize('ext', EXTENSIONS)
+def test_precedence_cli_over_env(ext):
+    """A key defined in the file via ${ENV} is filled by the env var, but a
+    command-line flag must still win over the env-resolved value (CLI > env)."""
+    setup_env()
+    cfg_filename = locate_data_file(f'env.{ext}')
+    # IP_ALPHA is set in env (10.0.0.1); override it via CLI
+    cmd_args = ['', '--servers.alpha.ip', '9.9.9.9']
+    with mock.patch.object(sys, 'argv', cmd_args):
+        args = create_parser(cfg_filename).parse()
+
+    # CLI beats the env-interpolated value
+    assert args.servers.alpha.ip == '9.9.9.9'
+    # sibling key with no CLI flag keeps its env-resolved value
+    assert args.servers.alpha.dc == 'path/ab cd/other_path/qwe'
+
+
+@pytest.mark.parametrize('ext', EXTENSIONS)
+def test_hierarch_cmd_override(ext):
+    """Command line can override a value nested inside a hierarchical config
+    (closes the previous TODO: test hierarchical config - overwrite params in cmd)."""
+    cfg_filename = locate_data_file(f'hierarch.{ext}')
+    cmd_args = ['', '--database.connection_max', '42']
+    with mock.patch.object(sys, 'argv', cmd_args):
+        args = create_parser(cfg_filename).parse()
+
+    assert args.database.connection_max == 42
+    # untouched nested values come from the file
+    assert args.servers.alpha.ip == '10.0.0.1'
+    assert args.servers.alpha.dc == 'abcd'
